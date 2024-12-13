@@ -17,12 +17,14 @@ import io.choerodon.swagger.annotation.Permission;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+import java.util.List;
+
 /**
  * API接口
  */
 @Api(tags = SwaggerTags.EXAMPLE)
 @RestController("exampleController.v1")
-@RequestMapping("/v1/example")
+@RequestMapping("/v1/{organizationId}/getConfigFile")
 public class ExampleController extends BaseController {
 
     @Autowired
@@ -31,10 +33,10 @@ public class ExampleController extends BaseController {
     private ExampleRepository exampleRepository;
 
     @ApiOperation(value = "根据ID获取")
-    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
-    public ResponseEntity<PrefixDTO> getData(@PathVariable Long organizationId,) {
-        return Results.success(exampleRepository.selectByPrimaryKey());
+    public ResponseEntity<List<PrefixDTO>> getData(@PathVariable Long organizationId) {
+        return Results.success(exampleService.getFileConfig(organizationId));
     }
 
 

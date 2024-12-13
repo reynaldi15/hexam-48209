@@ -8,7 +8,7 @@ import lombok.Setter;
 public class PrefixDTO {
     private String bucketname;
     private String directory;
-    private String content_type;
-    private String storage_unit;
-    private String storage_size;
+    private String contentType;
+    private String storageUnit;
+    private String storageSize;
 }
