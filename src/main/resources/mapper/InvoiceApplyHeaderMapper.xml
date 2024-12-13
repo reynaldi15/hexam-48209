@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.demo.infra.mapper.InvoiceApplyHeaderMapper">
+
+    <resultMap id="BaseResultMap" type="com.hand.demo.domain.entity.InvoiceApplyHeader">
+    <id column="apply_header_id" property="applyHeaderId"/>
+    <result column="apply_header_number" property="applyHeaderNumber"/>
+    <result column="apply_status" property="applyStatus"/>
+    <result column="bill_to_address" property="billToAddress"/>
+    <result column="bill_to_email" property="billToEmail"/>
+    <result column="bill_to_person" property="billToPerson"/>
+    <result column="bill_to_phone" property="billToPhone"/>
+    <result column="del_flag" property="delFlag"/>
+    <result column="exclude_tax_amount" property="excludeTaxAmount"/>
+    <result column="invoice_color" property="invoiceColor"/>
+    <result column="invoice_type" property="invoiceType"/>
+    <result column="remark" property="remark"/>
+    <result column="submit_time" property="submitTime"/>
+    <result column="tax_amount" property="taxAmount"/>
+    <result column="tenant_id" property="tenantId"/>
+    <result column="total_amount" property="totalAmount"/>
+    <result column="creation_date" property="creationDate"/>
+    <result column="created_by" property="createdBy"/>
+    <result column="last_updated_by" property="lastUpdatedBy"/>
+    <result column="last_update_date" property="lastUpdateDate"/>
+    <result column="object_version_number" property="objectVersionNumber"/>
+    <result column="ATTRIBUTE1" property="attribute1"/>
+    <result column="ATTRIBUTE2" property="attribute2"/>
+    <result column="ATTRIBUTE3" property="attribute3"/>
+    <result column="ATTRIBUTE4" property="attribute4"/>
+    <result column="ATTRIBUTE5" property="attribute5"/>
+    <result column="ATTRIBUTE6" property="attribute6"/>
+    <result column="ATTRIBUTE7" property="attribute7"/>
+    <result column="ATTRIBUTE8" property="attribute8"/>
+    <result column="ATTRIBUTE9" property="attribute9"/>
+    <result column="ATTRIBUTE10" property="attribute10"/>
+    <result column="ATTRIBUTE11" property="attribute11"/>
+    <result column="ATTRIBUTE12" property="attribute12"/>
+    <result column="ATTRIBUTE13" property="attribute13"/>
+    <result column="ATTRIBUTE14" property="attribute14"/>
+    <result column="ATTRIBUTE15" property="attribute15"/>
+    </resultMap>
+
+    <resultMap id="DetailResultMap" extends="BaseResultMap" type="com.hand.demo.domain.entity.InvoiceApplyHeader">
+    <collection
+            property="invoiceApplyLines"
+            ofType="com.hand.demo.domain.entity.InvoiceApplyLine"
+            javaType="java.util.ArrayList"
+    >
+        <id column="apply_line_id" property="applyLineId"/>
+        <result column="line_apply_header_id" property="applyHeaderId"/>
+        <result column="content_name" property="contentName"/>
+        <result column="invoice_name" property="invoiceName"/>
+        <result column="quantity" property="quantity"/>
+        <result column="unit_price" property="unitPrice"/>
+        <result column="tax_rate" property="taxRate"/>
+        <result column="line_exclude_tax_amount" property="excludeTaxAmount"/>
+        <result column="line_tax_amount" property="taxAmount"/>
+        <result column="line_total_amount" property="totalAmount"/>
+    </collection>
+    </resultMap>
+
+    <sql id = "BaseSql">
+        tiah.apply_header_id,
+        tiah.apply_header_number,
+        tiah.apply_status,
+        tiah.ATTRIBUTE1,
+        tiah.ATTRIBUTE10,
+        tiah.ATTRIBUTE11,
+        tiah.ATTRIBUTE12,
+        tiah.ATTRIBUTE13,
+        tiah.ATTRIBUTE14,
+        tiah.ATTRIBUTE15,
+        tiah.ATTRIBUTE2,
+        tiah.ATTRIBUTE3,
+        tiah.ATTRIBUTE4,
+        tiah.ATTRIBUTE5,
+        tiah.ATTRIBUTE6,
+        tiah.ATTRIBUTE7,
+        tiah.ATTRIBUTE8,
+        tiah.ATTRIBUTE9,
+        tiah.bill_to_address,
+        tiah.bill_to_email,
+        tiah.bill_to_person,
+        tiah.bill_to_phone,
+        tiah.del_flag,
+        tiah.exclude_tax_amount,
+        tiah.invoice_color,
+        tiah.invoice_type,
+        tiah.remark,
+        tiah.submit_time,
+        tiah.tax_amount,
+        tiah.tenant_id,
+        tiah.total_amount,
+        tiah.creation_date,
+        tiah.created_by,
+        tiah.last_updated_by,
+        tiah.last_update_date,
+        tiah.object_version_number
+    </sql>
+    <select id = "selectList" resultType = "com.hand.demo.api.dto.InvoiceHeaderDTO">
+<!--    <select id = "selectList" resultType = "com.hand.demo.domain.entity.InvoiceApplyHeader">-->
+        select
+        <include refid = "BaseSql"/>
+        from todo_invoice_apply_header tiah
+        <where>
+            <if test="header.applyHeaderId !=null">
+                and tiah.apply_header_id = #{header.applyHeaderId,jdbcType = INTEGER}
+            </if>
+            <if test="header.applyHeaderNumber !=null">
+                and tiah.apply_header_number = #{applyHeaderNumber,jdbcType = VARCHAR}
+            </if>
+            <if test="header.applyStatus !=null">
+                and tiah.apply_status = #{applyStatus,jdbcType = VARCHAR}
+                and header.apply_status LIKE CONCAT('%', #{header.applyStatus}, '%')
+            </if>
+            <if test="header.attribute1 !=null">
+                and tiah.ATTRIBUTE1 = #{attribute1,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute10 !=null">
+                and tiah.ATTRIBUTE10 = #{attribute10,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute11 !=null">
+                and tiah.ATTRIBUTE11 = #{attribute11,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute12 !=null">
+                and tiah.ATTRIBUTE12 = #{attribute12,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute13 !=null">
+                and tiah.ATTRIBUTE13 = #{attribute13,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute14 !=null">
+                and tiah.ATTRIBUTE14 = #{attribute14,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute15 !=null">
+                and tiah.ATTRIBUTE15 = #{attribute15,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute2 !=null">
+                and tiah.ATTRIBUTE2 = #{attribute2,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute3 !=null">
+                and tiah.ATTRIBUTE3 = #{attribute3,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute4 !=null">
+                and tiah.ATTRIBUTE4 = #{attribute4,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute5 !=null">
+                and tiah.ATTRIBUTE5 = #{attribute5,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute6 !=null">
+                and tiah.ATTRIBUTE6 = #{attribute6,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute7 !=null">
+                and tiah.ATTRIBUTE7 = #{attribute7,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute8 !=null">
+                and tiah.ATTRIBUTE8 = #{attribute8,jdbcType = VARCHAR}
+            </if>
+            <if test="header.attribute9 !=null">
+                and tiah.ATTRIBUTE9 = #{attribute9,jdbcType = VARCHAR}
+            </if>
+            <if test="header.billToAddress !=null">
+                and tiah.bill_to_address = #{billToAddress,jdbcType = VARCHAR}
+            </if>
+            <if test="header.billToEmail !=null">
+                and tiah.bill_to_email = #{billToEmail,jdbcType = VARCHAR}
+            </if>
+            <if test="header.billToPerson !=null">
+                and tiah.bill_to_person = #{billToPerson,jdbcType = VARCHAR}
+            </if>
+            <if test="header.billToPhone !=null">
+                and tiah.bill_to_phone = #{billToPhone,jdbcType = VARCHAR}
+            </if>
+            <if test="header.delFlag !=null">
+                and tiah.del_flag = #{delFlag,jdbcType = INTEGER}
+            </if>
+            <if test="header.excludeTaxAmount !=null">
+                and tiah.exclude_tax_amount = #{excludeTaxAmount,jdbcType = OTHER}
+            </if>
+            <if test="header.invoiceColor !=null">
+                and tiah.invoice_color = #{invoiceColor,jdbcType = VARCHAR}
+                and header.invoice_color LIKE CONCAT('%', #{header.invoiceColor}, '%')
+            </if>
+            <if test="header.invoiceType !=null">
+                and tiah.invoice_type = #{invoiceType,jdbcType = VARCHAR}
+                and header.invoice_type LIKE CONCAT('%', #{header.invoiceType}, '%')
+            </if>
+            <if test="header.remark !=null">
+                and tiah.remark = #{remark,jdbcType = OTHER}
+            </if>
+            <if test="header.submitTime !=null">
+                and tiah.submit_time = #{submitTime,jdbcType = TIMESTAMP}
+            </if>
+            <if test="header.taxAmount !=null">
+                and tiah.tax_amount = #{taxAmount,jdbcType = OTHER}
+            </if>
+            <if test="header.tenantId !=null">
+                and tiah.tenant_id = #{tenantId,jdbcType = INTEGER}
+            </if>
+            <if test="header.totalAmount !=null">
+                and tiah.total_amount = #{totalAmount,jdbcType = OTHER}
+            </if>
+            <choose>
+                <when test="header.delFlag != null and header.delFlag == 1">
+                    and tiah.del_flag = 1
+                </when>
+                <otherwise>
+                    and (tiah.del_flag = 0 or tiah.del_flag is null)
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+        <select id="selectHeaderNumber" resultType="com.hand.demo.domain.entity.InvoiceApplyHeader">
+        SELECT *
+        FROM todo_invoice_apply_header
+        WHERE apply_header_id = #{applyHeaderNumber} and del_flag = 0
+    </select>
+
+</mapper>
