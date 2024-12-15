@@ -56,20 +56,22 @@ public class InvoiceApplyHeaderController extends BaseController {
         Page<InvoiceHeaderDTO> list = invoiceApplyHeaderService.selectList(pageRequest, invoiceApplyHeader);
         return Results.success(list);
     }
-
-    @ApiOperation(value = "明细")
-    @Permission(level = ResourceLevel.ORGANIZATION)
-    @GetMapping("/{applyHeaderId}")
-    public ResponseEntity<InvoiceApplyHeader> detail(@PathVariable Long applyHeaderId) {
-        InvoiceApplyHeader invoiceApplyHeader = invoiceApplyHeaderRepository.selectByPrimary(applyHeaderId);
-        return Results.success(invoiceApplyHeader);
-    }
+//    Todo off the controlloer dosn't use
+//    @ApiOperation(value = "明细")
+//    @Permission(level = ResourceLevel.ORGANIZATION)
+//    @GetMapping("/{applyHeaderId}")
+//    public ResponseEntity<InvoiceApplyHeader> detail(@PathVariable Long applyHeaderId) {
+//        InvoiceApplyHeader invoiceApplyHeader = invoiceApplyHeaderRepository.selectByPrimary(applyHeaderId);
+//        return Results.success(invoiceApplyHeader);
+//    }
+// Fix
     @ApiOperation(value = "details")
     @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
     @GetMapping("/details/{applyHeaderId}")
     @ProcessLovValue(targetField = BaseConstants.FIELD_BODY)
-    public InvoiceHeaderDTO detailAndLine(@PathVariable Long applyHeaderId) {
-        return invoiceApplyHeaderService.detailAndLine(applyHeaderId);
+//    Todo change the name function to make dosn't confuse
+    public InvoiceHeaderDTO detailWithLine(@PathVariable Long applyHeaderId) {
+        return invoiceApplyHeaderService.detailWithLine(applyHeaderId);
     }
 
     @ApiOperation(value = "创建或更新")

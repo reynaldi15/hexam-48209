@@ -3,7 +3,6 @@ package com.hand.demo.api.dto;
 import com.hand.demo.domain.entity.InvoiceApplyHeader;
 import com.hand.demo.domain.entity.InvoiceApplyLine;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hzero.export.annotation.ExcelSheet;

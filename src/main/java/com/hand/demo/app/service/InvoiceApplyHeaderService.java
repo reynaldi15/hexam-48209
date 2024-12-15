@@ -27,7 +27,7 @@ public interface InvoiceApplyHeaderService {
 
     //Detail and line page
 
-        InvoiceHeaderDTO detailAndLine(Long applyHeaderId);
+        InvoiceHeaderDTO detailWithLine(Long applyHeaderId);
 
     /**
      * 保存数据

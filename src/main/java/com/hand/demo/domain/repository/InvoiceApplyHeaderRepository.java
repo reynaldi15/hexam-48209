@@ -29,9 +29,10 @@ public interface InvoiceApplyHeaderRepository extends BaseRepository<InvoiceAppl
      * @return 返回值
      */
     List<InvoiceHeaderDTO> selectList(InvoiceHeaderDTO invoiceApplyHeader);
-    List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader);
     InvoiceHeaderDTO selectByPrimary(Long applyHeaderId);
     void softDelete(List<InvoiceApplyHeader> invoiceApplyHeaders);
     InvoiceApplyHeader selectApplyHeaderNumber(String applyHeaderNumber);
+
 //    List<InvoiceApplyLine> selectLinesByHeaderId(Long applyHeaderId);
+        List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader);
 }

@@ -39,6 +39,7 @@ public class InvoiceApplyHeaderRepositoryImpl extends BaseRepositoryImpl<Invoice
     public List<InvoiceHeaderDTO> selectList(InvoiceHeaderDTO invoiceApplyHeader) {
         return invoiceApplyHeaderMapper.selectList(invoiceApplyHeader);
     }
+//    Todo optimize the code with close the programe dosn't use
     @Override
     public List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader) {
         return invoiceApplyHeaderMapper.selectList(invoiceApplyHeader);
@@ -71,7 +72,9 @@ public class InvoiceApplyHeaderRepositoryImpl extends BaseRepositoryImpl<Invoice
     }
     @Override
     public InvoiceApplyHeader selectApplyHeaderNumber(String applyHeaderNumber) {
-        return invoiceApplyHeaderMapper.selectHeaderNumber(applyHeaderNumber);
+//        Todo close to try code
+//        return invoiceApplyHeaderMapper.selectHeaderNumber(applyHeaderNumber);
+        return null;
     }
 
 }

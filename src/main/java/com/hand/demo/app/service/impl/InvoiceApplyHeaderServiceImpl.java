@@ -1,17 +1,20 @@
 package com.hand.demo.app.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.demo.api.dto.InvoiceHeaderDTO;
 import com.hand.demo.app.service.InvoiceApplyLineService;
 import com.hand.demo.domain.entity.InvoiceApplyLine;
 import com.hand.demo.domain.repository.InvoiceApplyLineRepository;
+import com.hand.demo.infra.constant.Constants;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.exception.CommonException;
 import io.choerodon.mybatis.pagehelper.PageHelper;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 
+import io.seata.common.util.CollectionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.dubbo.common.logger.Logger;
@@ -20,6 +23,7 @@ import org.hzero.boot.platform.code.builder.CodeRuleBuilder;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
 import org.hzero.boot.platform.lov.dto.LovValueDTO;
+import org.hzero.core.cache.ProcessCacheValue;
 import org.hzero.core.redis.RedisHelper;
 import org.hzero.core.redis.RedisQueueHelper;
 import org.hzero.core.util.Results;
@@ -67,21 +71,26 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
     //Detail and line page
     @Override
     @ProcessLovValue
-    public InvoiceHeaderDTO detailAndLine(Long applyHeaderId) {
+//    @ProcessCacheValue
+    public InvoiceHeaderDTO detailWithLine(Long applyHeaderId) {
         String headerCacheKey = "48209:IAH:" + applyHeaderId;
         String cachedValue = redisHelper.strGet(headerCacheKey);
 
         if(StringUtils.isNotBlank(cachedValue)){
             // TODO  JSON.paraeObject(chan,class)
-            return redisHelper.fromJson(cachedValue, InvoiceHeaderDTO.class);
+            return JSON.parseObject(cachedValue, InvoiceHeaderDTO.class);
+//            return redisHelper.fromJson(cachedValue, InvoiceHeaderDTO.class);
         }else{
+            // Fetch header details
             InvoiceHeaderDTO header = invoiceApplyHeaderRepository.selectByPrimary(applyHeaderId);
+            // Fetch associated lines
             InvoiceApplyLine invoiceApplyLine = new InvoiceApplyLine();
             invoiceApplyLine.setApplyHeaderId(applyHeaderId);
             List<InvoiceApplyLine> invoiceApplyLines = invoiceApplyLineRepository.selectList(invoiceApplyLine);
             header.setInvoiceApplyLines(invoiceApplyLines);
-            redisHelper.strSet(headerCacheKey, redisHelper.toJson(header));
-
+            //Todo change toJson to json.jsonstring()
+            redisHelper.strSet(headerCacheKey, JSON.toJSONString(header));
+//            redisHelper.strSet(headerCacheKey, redisHelper.toJson(header));
             return header;
         }
 
@@ -91,17 +100,25 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
     @Transactional(rollbackFor = Exception.class)
     public void saveData(List<InvoiceApplyHeader> invoiceApplyHeaders) {
         String headerCacheKey = "48209:IAH" + ":*";
-        List<InvoiceApplyHeader> insert = invoiceApplyHeaders.stream().filter(line -> line.getApplyHeaderId()== null).collect(Collectors.toList());
-        //Todo cahnge thelogic. dont looping befor query
-        invoiceApplyHeaders.forEach(header -> validateData(header, lovAdapter));
-        insert.forEach(this::generateNumber);
-        invoiceApplyHeaderRepository.batchInsertSelective(insert);
+        List<InvoiceApplyHeader> insertList = invoiceApplyHeaders.stream()
+                .filter(header -> header.getApplyHeaderId()== null)
+                .collect(Collectors.toList());
+        List<InvoiceApplyHeader> updateList = invoiceApplyHeaders.stream()
+                .filter(header -> header.getApplyHeaderId() != null)
+                .collect(Collectors.toList());
+//        proceses isnert and upadate
+        //Todo cahnge thelogic. dont looping before query
+        if (invoiceApplyHeaders.isEmpty())return;
+        invoiceApplyHeaders.forEach(header -> insertData(header, lovAdapter));
+        insertList.forEach(this::generateNumber);
+        invoiceApplyHeaderRepository.batchInsertSelective(insertList);
         //Todo Update data
         lineProcess(invoiceApplyHeaders);
+//        updateData(updateList);
         redisHelper.delKey(headerCacheKey);
 
     }
-    public static void validateData(InvoiceApplyHeader invoiceApplyHeader, LovAdapter lovAdapter){
+    public static void insertData(InvoiceApplyHeader invoiceApplyHeader, LovAdapter lovAdapter){
         if(invoiceApplyHeader.getInvoiceType() != null){
             validateColoumn("HEXAM-INV-HEADER-TYPE-48209",invoiceApplyHeader.getInvoiceType(),
                     invoiceApplyHeader.getTenantId(),lovAdapter);
@@ -115,6 +132,55 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
                     invoiceApplyHeader.getTenantId(),lovAdapter);
         }
 
+    }
+    public void updateData(InvoiceApplyHeader headers){
+//        if (headers.isEmpty()) return;
+//        List<InvoiceApplyHeader> invoiceApplyHeaders1 =
+//                selectByHeaderIds(headers.stream().map(InvoiceApplyHeader::getApplyHeaderId).collect(Collectors.toList()));
+//        Map<Long, InvoiceApplyHeader> headerMap = new HashMap<>();
+//        for (InvoiceApplyHeader invoiceApplyHeader : invoiceApplyHeaders1) {
+//            headerMap.put(invoiceApplyHeader.getApplyHeaderId(), invoiceApplyHeader);
+//        }
+//        List<InvoiceApplyHeader> collect = headers.stream()
+//                .peek(header -> {
+//                    // Filter out fields that are null or undesired
+//                    if (header.getApplyStatus() == null)
+//                        header.setApplyStatus(headerMap.get(header.getApplyHeaderId()).getApplyStatus());
+//                    if (header.getBillToAddress() == null)
+//                        header.setBillToAddress(headerMap.get(header.getApplyHeaderId()).getBillToAddress());
+//                    if (header.getBillToEmail() == null)
+//                        header.setBillToEmail(headerMap.get(header.getApplyHeaderId()).getBillToEmail());
+//                    if (header.getBillToPerson() == null)
+//                        header.setBillToPerson(headerMap.get(header.getApplyHeaderId()).getBillToPerson());
+//                    if (header.getBillToPhone() == null)
+//                        header.setBillToPhone(headerMap.get(header.getApplyHeaderId()).getBillToPhone());
+//                    if (header.getInvoiceColor() == null)
+//                        header.setInvoiceColor(headerMap.get(header.getApplyHeaderId()).getInvoiceColor());
+//                    if (header.getInvoiceType() == null)
+//                        header.setInvoiceType(headerMap.get(header.getApplyHeaderId()).getInvoiceType());
+//                    if (header.getRemark() == null)
+//                        header.setRemark(headerMap.get(header.getApplyHeaderId()).getRemark());
+//                })
+//                .collect(Collectors.toList());
+//
+//        invoiceApplyHeaderRepository.batchUpdateOptional(new ArrayList<>(headers),
+//                InvoiceApplyHeader.FIELD_APPLY_STATUS,
+//                InvoiceApplyHeader.FIELD_BILL_TO_ADDRESS,
+//                InvoiceApplyHeader.FIELD_BILL_TO_EMAIL,
+//                InvoiceApplyHeader.FIELD_BILL_TO_PERSON,
+//                InvoiceApplyHeader.FIELD_BILL_TO_PHONE,
+//                InvoiceApplyHeader.FIELD_INVOICE_COLOR,
+//                InvoiceApplyHeader.FIELD_INVOICE_TYPE,
+//                InvoiceApplyHeader.FIELD_REMARK);
+//        if(CollectionUtils.isNotEmpty(headers))
+//        {
+//            List<String> keys = new ArrayList<>();
+//            for (InvoiceApplyHeader invoiceApplyHeader : headers)
+//            {
+//                keys.add(Constants.CACHE_KEY_PREFIX+":"+invoiceApplyHeader.getApplyHeaderNumber());
+//            }
+//            redisHelper.delKeys(keys);
+//        }
     }
     public static void validateColoumn(String lovCode, String fieldValue, Long tenantId, LovAdapter lovAdapter) {
         List<LovValueDTO> lovValues = lovAdapter.queryLovValue(lovCode, tenantId);
@@ -186,54 +252,57 @@ public ResponseEntity<InvoiceApplyHeader> deleteById(Long applyHeaderId) {
     @Transactional(rollbackFor = Exception.class)
     @ProcessLovValue
     public List<InvoiceHeaderDTO> exportHeader(InvoiceApplyHeader invoiceApplyHeader){
-        try {
-            List<InvoiceApplyHeader> headers = invoiceApplyHeaderRepository.selectList(invoiceApplyHeader);
-            List<InvoiceHeaderDTO> exportList = new ArrayList<>();
-
-            for(InvoiceApplyHeader header : headers) {
-                InvoiceHeaderDTO exportHeader = new InvoiceHeaderDTO();
-                BeanUtils.copyProperties(header, exportHeader);
-                validateData(exportHeader, lovAdapter);
-                exportList.add(exportHeader);
-            }
-            return exportList;
-        } catch (Exception e) {
-            throw new IllegalStateException (e);
-        }
+//        Todo close the code to try
+//        try {
+//            List<InvoiceApplyHeader> headers = invoiceApplyHeaderRepository.selectList(invoiceApplyHeader);
+//            List<InvoiceHeaderDTO> exportList = new ArrayList<>();
+//
+//            for(InvoiceApplyHeader header : headers) {
+//                InvoiceHeaderDTO exportHeader = new InvoiceHeaderDTO();
+//                BeanUtils.copyProperties(header, exportHeader);
+//                validateData(exportHeader, lovAdapter);
+//                exportList.add(exportHeader);
+//            }
+//            return exportList;
+//        } catch (Exception e) {
+//            throw new IllegalStateException (e);
+//        }
+        return null;
     }
     @Override
     @Transactional
     public List<InvoiceApplyHeader> failed(InvoiceApplyHeader invoiceApplyHeader) {
-        invoiceApplyHeader.setDelFlag(0);
-        invoiceApplyHeader.setInvoiceColor("R");
-        invoiceApplyHeader.setApplyStatus("F");
-        invoiceApplyHeader.setInvoiceType("E");
-        return invoiceApplyHeaderRepository.selectList(invoiceApplyHeader);
+//        invoiceApplyHeader.setDelFlag(0);
+//        invoiceApplyHeader.setInvoiceColor("R");
+//        invoiceApplyHeader.setApplyStatus("F");
+//        invoiceApplyHeader.setInvoiceType("E");
+//        return invoiceApplyHeaderRepository.selectList(invoiceApplyHeader);
+        return null;
     }
     // scheduler
     @Override
     public void scheduleTask(String delFlag, String applyStatus, String invoiceColor, String invoiceType){
-        List<InvoiceApplyHeader> invoiceApplyHeaders = invoiceApplyHeaderRepository.selectList(new InvoiceApplyHeader() {{
-            setDelFlag(Integer.parseInt(delFlag));
-            setApplyStatus(applyStatus);
-            setInvoiceColor(invoiceColor);
-            setInvoiceType(invoiceType);
-        }});
-        if (invoiceApplyHeaders.isEmpty()) {
-            log.info("InvoiceApplyHeaders is empty for scheduling task");
-            return;
-        }
-        ObjectMapper objectMapper = new ObjectMapper();
-// Convert each InvoiceApplyHeader to JSON string and collect into a List
-        try {
-            // Convert list to JSON string
-            String jsonString = objectMapper.writeValueAsString(invoiceApplyHeaders);
-            // Save to Redis Message Queue
-            String redisKey = "Hexam-48208:Exam";
-            redisQueueHelper.push(redisKey, jsonString);
-        } catch (JsonProcessingException e) {
-            throw new CommonException("Error converting list to JSON");
-        }
+//        List<InvoiceApplyHeader> invoiceApplyHeaders = invoiceApplyHeaderRepository.selectList(new InvoiceApplyHeader() {{
+//            setDelFlag(Integer.parseInt(delFlag));
+//            setApplyStatus(applyStatus);
+//            setInvoiceColor(invoiceColor);
+//            setInvoiceType(invoiceType);
+//        }});
+//        if (invoiceApplyHeaders.isEmpty()) {
+//            log.info("InvoiceApplyHeaders is empty for scheduling task");
+//            return;
+//        }
+//        ObjectMapper objectMapper = new ObjectMapper();
+//  Todo Convert each InvoiceApplyHeader to JSON string and collect into a List
+//        try {
+//            // Convert list to JSON string
+//            String jsonString = objectMapper.writeValueAsString(invoiceApplyHeaders);
+//            // Save to Redis Message Queue
+//            String redisKey = "Hexam-48208:Exam";
+//            redisQueueHelper.push(redisKey, jsonString);
+//        } catch (JsonProcessingException e) {
+//            throw new CommonException("Error converting list to JSON");
+//        }
 
 
 

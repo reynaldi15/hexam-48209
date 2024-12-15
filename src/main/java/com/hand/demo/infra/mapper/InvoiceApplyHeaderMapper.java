@@ -21,8 +21,11 @@ public interface InvoiceApplyHeaderMapper extends BaseMapper<InvoiceApplyHeader>
      * @param invoiceApplyHeader 查询条件
      * @return 返回值
      */
-    List<InvoiceHeaderDTO> selectList(@Param("header") InvoiceHeaderDTO invoiceApplyHeader);
-    List<InvoiceApplyHeader> selectList(@Param("header") InvoiceApplyHeader invoiceApplyHeader);
-    InvoiceApplyHeader selectHeaderNumber(@Param("applyHeaderNumber") String applyHeaderNumber);
+//    This before
+//    List<InvoiceHeaderDTO> selectList(@Param("header") InvoiceHeaderDTO invoiceApplyHeader);
+//    This after
+    List<InvoiceHeaderDTO> selectList(InvoiceHeaderDTO invoiceApplyHeader);
+    InvoiceApplyHeader selectList(InvoiceApplyHeader invoiceApplyHeader);
+//    InvoiceApplyHeader selectHeaderNumber(@Param("applyHeaderNumber") String applyHeaderNumber);
 }
 
