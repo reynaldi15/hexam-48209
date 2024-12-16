@@ -1,6 +1,7 @@
 package com.hand.demo.api.controller.v1;
 
 import com.hand.demo.api.dto.InvoiceHeaderDTO;
+import com.hand.demo.api.dto.ReportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.core.iam.ResourceLevel;
 import io.choerodon.mybatis.pagehelper.annotation.SortDefault;
@@ -46,7 +47,7 @@ public class InvoiceApplyHeaderController extends BaseController {
     @Autowired
     private RedisHelper redisHelper;
 
-    @ApiOperation(value = "列表")
+    @ApiOperation(value = "Select List of Invoice")
     @Permission(level = ResourceLevel.ORGANIZATION)
     @GetMapping
     @ProcessLovValue(targetField = BaseConstants.FIELD_BODY)
@@ -54,6 +55,16 @@ public class InvoiceApplyHeaderController extends BaseController {
                                                        @ApiIgnore @SortDefault(value = InvoiceApplyHeader.FIELD_APPLY_HEADER_ID,
                                                                  direction = Sort.Direction.DESC) PageRequest pageRequest) {
         Page<InvoiceHeaderDTO> list = invoiceApplyHeaderService.selectList(pageRequest, invoiceApplyHeader);
+        return Results.success(list);
+    }
+    @ApiOperation(value = "Select List By Tenant of Invoice")
+    @Permission(level = ResourceLevel.ORGANIZATION)
+    @GetMapping("/selectByTenant")
+    @ProcessLovValue(targetField = BaseConstants.FIELD_BODY)
+    public ResponseEntity<Page<InvoiceHeaderDTO>> selectByTenant(InvoiceHeaderDTO invoiceApplyHeader, @PathVariable Long organizationId,
+                                                       @ApiIgnore @SortDefault(value = InvoiceApplyHeader.FIELD_APPLY_HEADER_ID,
+                                                               direction = Sort.Direction.DESC) PageRequest pageRequest) {
+        Page<InvoiceHeaderDTO> list = invoiceApplyHeaderService.selectByTenant(pageRequest, invoiceApplyHeader);
         return Results.success(list);
     }
 //    Todo off the controlloer dosn't use
@@ -115,6 +126,13 @@ public class InvoiceApplyHeaderController extends BaseController {
                                                               HttpServletResponse response,
                                                               @PathVariable String organizationId) {
         return Results.success(invoiceApplyHeaderService.exportHeader(invoiceApplyHeaderDTO));
+    }
+    @ApiOperation(value = "Report Excel Export")
+    @Permission(level = ResourceLevel.ORGANIZATION, permissionLogin = true)
+    @GetMapping("/report")
+    @ProcessLovValue(targetField = BaseConstants.FIELD_BODY)
+    public ResponseEntity<ReportDTO> report(@PathVariable Long organizationId, ReportDTO reportDTO) {
+        return invoiceApplyHeaderService.reportExcel(organizationId, reportDTO);
     }
 }
 

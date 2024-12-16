@@ -34,5 +34,5 @@ public interface InvoiceApplyHeaderRepository extends BaseRepository<InvoiceAppl
     InvoiceApplyHeader selectApplyHeaderNumber(String applyHeaderNumber);
 
 //    List<InvoiceApplyLine> selectLinesByHeaderId(Long applyHeaderId);
-        List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader);
+//        List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader);
 }

@@ -26,6 +26,6 @@ public interface InvoiceApplyHeaderMapper extends BaseMapper<InvoiceApplyHeader>
 //    This after
     List<InvoiceHeaderDTO> selectList(InvoiceHeaderDTO invoiceApplyHeader);
     InvoiceApplyHeader selectList(InvoiceApplyHeader invoiceApplyHeader);
-//    InvoiceApplyHeader selectHeaderNumber(@Param("applyHeaderNumber") String applyHeaderNumber);
+    InvoiceApplyHeader selectHeaderNumber(@Param("applyHeaderNumber") String applyHeaderNumber);
 }
 

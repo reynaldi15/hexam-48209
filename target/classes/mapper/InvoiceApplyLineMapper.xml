@@ -142,17 +142,29 @@
         WHERE apply_header_id = #{applyHeaderIdlist}
     </select>
 <!--    // Todo fix the query of line header-->
-<!--    <select id="selectApplyHeader2" resultType="com.hand.demo.domain.entity.InvoiceApplyLine">-->
-<!--        SELECT *-->
-<!--        FROM todo_invoice_apply_line-->
-<!--        <where>-->
-<!--            <if test="#{applyHeaderIdlist != null and applyHeaderIdlist.size > 0}">-->
-<!--                and apply_header_id in-->
-<!--                <foreach collection="applyHeaderIdlist" open="(" close=")" item="applyHeaderId" separator=",">-->
-<!--                    #{applyHeaderId}-->
-<!--                </foreach>-->
-<!--            </if>-->
-<!--        </where>-->
-<!--    </select>-->
+    <select id="selectByHeaderIds" resultType="com.hand.demo.domain.entity.InvoiceApplyLine"
+            parameterType="list">
+        select
+        <include refid = "BaseSql"/>
+        from todo_invoice_apply_line tial
+        <where>
+            tial.apply_header_id in
+            <foreach collection="list" item="applyHeaderIds" open="(" separator="," close=")">
+                #{applyHeaderId}
+            </foreach>
+        </where>
+    </select>
 </mapper>
+        <!--    <select id="selectApplyHeader2" resultType="com.hand.demo.domain.entity.InvoiceApplyLine">-->
+        <!--        SELECT *-->
+        <!--        FROM todo_invoice_apply_line-->
+        <!--        <where>-->
+        <!--            <if test="#{applyHeaderIdlist != null and applyHeaderIdlist.size > 0}">-->
+        <!--                and apply_header_id in-->
+        <!--                <foreach collection="applyHeaderIdlist" open="(" close=")" item="applyHeaderId" separator=",">-->
+        <!--                    #{applyHeaderId}-->
+        <!--                </foreach>-->
+        <!--            </if>-->
+        <!--        </where>-->
+        <!--    </select>-->
 

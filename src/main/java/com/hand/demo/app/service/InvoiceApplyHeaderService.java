@@ -1,6 +1,7 @@
 package com.hand.demo.app.service;
 
 import com.hand.demo.api.dto.InvoiceHeaderDTO;
+import com.hand.demo.api.dto.ReportDTO;
 import io.choerodon.core.domain.Page;
 import io.choerodon.mybatis.pagehelper.domain.PageRequest;
 import com.hand.demo.domain.entity.InvoiceApplyHeader;
@@ -24,6 +25,7 @@ public interface InvoiceApplyHeaderService {
      * @return 返回值
      */
     Page<InvoiceHeaderDTO> selectList(PageRequest pageRequest, InvoiceHeaderDTO invoiceApplyHeaders);
+    Page<InvoiceHeaderDTO> selectByTenant(PageRequest pageRequest, InvoiceHeaderDTO invoiceApplyHeaders);
 
     //Detail and line page
 
@@ -43,5 +45,7 @@ public interface InvoiceApplyHeaderService {
 
     // scheduler
     void scheduleTask(String delFlag, String appluStatus, String invoiceColor, String invoiceType);
+
+    ResponseEntity<ReportDTO> reportExcel(Long organizationId, ReportDTO reportDTO);
 }
 

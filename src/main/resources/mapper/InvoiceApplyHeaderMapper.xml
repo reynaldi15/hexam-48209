@@ -163,10 +163,12 @@
         </where>
     </select>
 <!--    try to make oen query in header-->
-<!--        <select id="selectHeaderNumber" resultType="com.hand.demo.domain.entity.InvoiceApplyHeader">-->
-<!--        SELECT *-->
-<!--        FROM todo_invoice_apply_header-->
-<!--        WHERE apply_header_id = #{applyHeaderNumber} and del_flag = 0-->
-<!--    </select>-->
+        <select id="selectHeaderNumber" resultType="com.hand.demo.domain.entity.InvoiceApplyHeader">
+        SELECT *
+        FROM todo_invoice_apply_header
+            <where>
+                WHERE apply_header_id = #{applyHeaderNumber} and del_flag = 0
+            </where>
+    </select>
 
 </mapper>

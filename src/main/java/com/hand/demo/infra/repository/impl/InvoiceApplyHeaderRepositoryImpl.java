@@ -40,10 +40,10 @@ public class InvoiceApplyHeaderRepositoryImpl extends BaseRepositoryImpl<Invoice
         return invoiceApplyHeaderMapper.selectList(invoiceApplyHeader);
     }
 //    Todo optimize the code with close the programe dosn't use
-    @Override
-    public List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader) {
-        return invoiceApplyHeaderMapper.selectList(invoiceApplyHeader);
-    }
+//    @Override
+//    public List<InvoiceApplyHeader> selectList(InvoiceApplyHeader invoiceApplyHeader) {
+//        return invoiceApplyHeaderMapper.selectList(invoiceApplyHeader);
+//    }
 
     @Override
     public InvoiceHeaderDTO selectByPrimary(Long applyHeaderId) {

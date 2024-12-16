@@ -26,5 +26,6 @@ public class InvoiceHeaderDTO extends InvoiceApplyHeader {
     private String applyStatusMeaning;
 
     private List<InvoiceApplyLine> invoiceApplyLines;
+    private Boolean tenantAdminFlag;
 
 }

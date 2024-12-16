@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.demo.api.dto.InvoiceHeaderDTO;
+import com.hand.demo.api.dto.ReportDTO;
 import com.hand.demo.app.service.InvoiceApplyLineService;
 import com.hand.demo.domain.entity.InvoiceApplyLine;
 import com.hand.demo.domain.repository.InvoiceApplyLineRepository;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.logger.LoggerFactory;
+import org.hzero.boot.apaas.common.userinfo.domain.UserVO;
+import org.hzero.boot.apaas.common.userinfo.infra.feign.IamRemoteService;
 import org.hzero.boot.platform.code.builder.CodeRuleBuilder;
 import org.hzero.boot.platform.lov.adapter.LovAdapter;
 import org.hzero.boot.platform.lov.annotation.ProcessLovValue;
@@ -35,7 +38,7 @@ import org.springframework.stereotype.Service;
 import com.hand.demo.domain.entity.InvoiceApplyHeader;
 import com.hand.demo.domain.repository.InvoiceApplyHeaderRepository;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.hzero.boot.apaas.common.userinfo.domain.UserVO;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -63,11 +66,32 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
     private CodeRuleBuilder codeRuleBuilder;
     @Autowired
     private RedisQueueHelper redisQueueHelper;
+    @Autowired
+    private IamRemoteService iamRemoteService;
+    @Autowired
+    private ObjectMapper objectMapper;
     private static final Logger logger = LoggerFactory.getLogger(InvoiceApplyHeaderServiceImpl.class);
+
     @Override
     public Page<InvoiceHeaderDTO> selectList(PageRequest pageRequest, InvoiceHeaderDTO invoiceApplyHeader) {
         return PageHelper.doPageAndSort(pageRequest, () -> invoiceApplyHeaderRepository.selectList(invoiceApplyHeader));
     }
+    @Override
+    public Page<InvoiceHeaderDTO> selectByTenant(PageRequest pageRequest, InvoiceHeaderDTO invoiceApplyHeader) {
+        try{
+            ResponseEntity<String> iamUserString = iamRemoteService.selectSelf();
+            String body = iamUserString.getBody();
+            UserVO userVO = objectMapper.readValue(body, UserVO.class);
+            Boolean tenantAdminFlag = userVO.getTenantAdminFlag();
+            invoiceApplyHeader.setTenantAdminFlag(tenantAdminFlag);
+            return PageHelper.doPageAndSort(pageRequest, () -> invoiceApplyHeaderRepository.selectList(invoiceApplyHeader));
+        } catch (Exception e){
+            throw new RuntimeException("Failed to get user info");
+        }
+
+    }
+
+
     //Detail and line page
     @Override
     @ProcessLovValue
@@ -103,9 +127,7 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
         List<InvoiceApplyHeader> insertList = invoiceApplyHeaders.stream()
                 .filter(header -> header.getApplyHeaderId()== null)
                 .collect(Collectors.toList());
-        List<InvoiceApplyHeader> updateList = invoiceApplyHeaders.stream()
-                .filter(header -> header.getApplyHeaderId() != null)
-                .collect(Collectors.toList());
+
 //        proceses isnert and upadate
         //Todo cahnge thelogic. dont looping before query
         if (invoiceApplyHeaders.isEmpty())return;
@@ -113,8 +135,10 @@ public class InvoiceApplyHeaderServiceImpl implements InvoiceApplyHeaderService 
         insertList.forEach(this::generateNumber);
         invoiceApplyHeaderRepository.batchInsertSelective(insertList);
         //Todo Update data
-        lineProcess(invoiceApplyHeaders);
-//        updateData(updateList);
+        List<InvoiceApplyHeader> updateList = invoiceApplyHeaders.stream()
+                .filter(header -> header.getApplyHeaderId() != null)
+                .collect(Collectors.toList());
+
         redisHelper.delKey(headerCacheKey);
 
     }
@@ -306,6 +330,11 @@ public ResponseEntity<InvoiceApplyHeader> deleteById(Long applyHeaderId) {
 
 
 
+    }
+
+    @Override
+    public ResponseEntity<ReportDTO> reportExcel(Long organizationId, ReportDTO reportDTO) {
+        return null;
     }
 
 

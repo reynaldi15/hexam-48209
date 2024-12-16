@@ -30,7 +30,7 @@ import org.hzero.export.annotation.ExcelColumn;
  * @author
  * @since 2024-12-06 08:07:06
  */
-//@Entity
+@Entity
 @Getter
 @Setter
 @ApiModel("")
